@@ -4,16 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tadeo.CitasMedicasApp.modelo.Cita;
 import tadeo.CitasMedicasApp.controlador.CitaControlador;
+import tadeo.CitasMedicasApp.modelo.InformeCitas;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 @Component
 public class CitaForm extends JFrame {
-    CitaControlador citaServicio;
+    CitaControlador citaControlador;
     private JPanel panel;
     private JTable tablaCitas;
     private JTextField idTexto;
@@ -24,11 +27,12 @@ public class CitaForm extends JFrame {
     private JButton agregarCitaButton;
     private JButton actualizarCitaButton;
     private JButton borrarCitaButton;
+    private JButton informesButton;
     private DefaultTableModel tablaModeloCitas;
 
     @Autowired
-    public CitaForm(CitaControlador citaServicio) {
-        this.citaServicio = citaServicio;
+    public CitaForm(CitaControlador citaControlador) {
+        this.citaControlador = citaControlador;
         iniciarForma();
         agregarCitaButton.addActionListener(e -> agregarCita());
         tablaCitas.addMouseListener(new MouseAdapter() {
@@ -41,6 +45,7 @@ public class CitaForm extends JFrame {
 
         actualizarCitaButton.addActionListener(e -> actualizarCita());
         borrarCitaButton.addActionListener(e -> eliminarCita());
+        informesButton.addActionListener(e -> generarInforme());
     }
 
     private void iniciarForma() {
@@ -68,7 +73,7 @@ public class CitaForm extends JFrame {
         var hora = horaTexto.getText();
 
         var cita = new Cita(null, nombrePaciente, servicio, precio, hora);
-        this.citaServicio.guardarCita(cita);
+        this.citaControlador.guardarCita(cita);
         mostrarMensaje("Se agrego la cita para el paciente: " + nombrePaciente + " correctamente.");
         limpiarFormulario();
         listarCitas();
@@ -111,7 +116,7 @@ public class CitaForm extends JFrame {
             var hora = horaTexto.getText();
 
             var cita = new Cita(idPaciente, nombrePaciente, tipoServicio, precio, hora);
-            citaServicio.guardarCita(cita);
+            citaControlador.guardarCita(cita);
             mostrarMensaje("Se actualizo correctamente la cita de: " + nombrePaciente + ".");
             limpiarFormulario();
             listarCitas();
@@ -125,7 +130,7 @@ public class CitaForm extends JFrame {
             String idCita = tablaCitas.getModel().getValueAt(renglon, 0).toString();
             var cita = new Cita();
             cita.setId(Long.parseLong(idCita));
-            citaServicio.eliminarCita(cita);
+            citaControlador.eliminarCita(cita);
             mostrarMensaje("La cita " + idCita + " fue eliminada correctamente.");
             limpiarFormulario();
             listarCitas();
@@ -133,6 +138,25 @@ public class CitaForm extends JFrame {
             mostrarMensaje("No se selecciono ninguna cita para eliminar.");
         }
 
+    }
+
+    private void generarInforme(){
+        InformeCitas informe = citaControlador.generarInforme();
+
+        if (informe != null) {
+            mostrarVentanaInforme(informe);
+        } else {
+            mostrarMensaje("No hay citas para generar informe.");
+        }
+    }
+
+    private void mostrarVentanaInforme(InformeCitas informe){
+        String mensaje = "Paciente con la cita más cara: " + informe.getPacienteConCitaMasCara() + "\n" +
+                "Paciente con la cita más barata: " + informe.getPacienteConCitaMasBarata() + "\n" +
+                "Promedio de precios de las citas: " + informe.getPromedioPreciosCitas() + "\n" +
+                "Valor total acumulado de las citas: " + informe.getValorTotalCitas();
+
+        JOptionPane.showMessageDialog(this, mensaje, "Informe de Citas", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void limpiarFormulario() {
@@ -171,7 +195,7 @@ public class CitaForm extends JFrame {
     private void listarCitas() {
         tablaModeloCitas.setRowCount(0);
         //Obtener citas
-        var citas = citaServicio.listarCitas();
+        var citas = citaControlador.listarCitas();
         citas.forEach((cita) -> {
             Object[] renglonCita = {
                     cita.getId(),
