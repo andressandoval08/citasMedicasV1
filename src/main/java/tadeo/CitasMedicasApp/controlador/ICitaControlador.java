@@ -1,10 +1,10 @@
-package tadeo.CitasMedicasApp.servicio;
+package tadeo.CitasMedicasApp.controlador;
 
 import tadeo.CitasMedicasApp.modelo.Cita;
 
 import java.util.List;
 
-public interface ICitaServicio {
+public interface ICitaControlador {
     public List <Cita> listarCitas ();
 
     public Cita buscarCitaPorId(Long Id);

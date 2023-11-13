@@ -1,4 +1,4 @@
-package tadeo.CitasMedicasApp.servicio;
+package tadeo.CitasMedicasApp.controlador;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,7 @@ import tadeo.CitasMedicasApp.modelo.RepositorioCita;
 import java.util.List;
 
 @Service
-public class CitaServicio implements ICitaServicio {
+public class CitaControlador implements ICitaControlador {
     @Autowired
     private RepositorioCita repositorioCita;
 
